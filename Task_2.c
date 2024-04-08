@@ -5,10 +5,10 @@
 The main() function of the following C program initially constructs a binary search tree with each node 
 of type struct node and the data member in each node composed of a positive number greater than zero. 
 After the tree is constructed, the main() function calls a user-defined function delete_tree() that
-takes a pointer to the rootnode of the tree as input argument and deletes all the nodes in the tree. 
+takes the address of a pointer to the rootnode of the tree as input argument and deletes all the nodes in the tree. 
 However, in this case, the main() function utilizes the delete_tree() function to delete all the nodes
-in the right subtree of the rootnode and it does this by calling the function with the rightPtr member
-of the rootnode as input argument.
+in the right subtree of the rootnode and it does this by calling the function with the address of the
+rightPtr member of the rootnode as input argument.
 
 For instance, if data was inserted into this binary search tree in the following order: 
 5 7 3 6 4 2 8 1 9
@@ -32,6 +32,7 @@ the data in the printed output is delimited using one whitespace character.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct node
 {
@@ -44,17 +45,26 @@ void insert_node(struct node** treePtr, int data);
 void inOrder(struct node* treePtr);
 void delete_tree(struct node** treePtr);
 
-int main() {
+int main(int argc, char* argv[]) {
 	int temp = 0;
 	struct node* treePtr = NULL;
-    printf("Enter the value of the new data member: ");
-	scanf("%d", &temp);
-    while (temp > 0)
-    {
-        insert_node(&treePtr, temp);
-        printf("Enter the value of the new data member: ");
-        scanf("%d", &temp);            
-    }
+    // printf("Enter the value of the new data member: ");
+	// scanf("%d", &temp);
+	char* individualToken = '\0';
+	int argument[] = {};
+	individualToken = strtok(argv[1], ",");
+	while (individualToken!= NULL){
+		insert_node(&treePtr, atoi(individualToken));
+		individualToken = strtok(NULL, ",");
+	}
+
+    // while (temp > 0)
+    // {
+    //     insert_node(&treePtr, temp);
+    //     printf("Enter the value of the new data member: ");
+    //     scanf("%d", &temp);            
+    // }
+
     printf("Initial version of binary tree:\n");
     inOrder(treePtr);
     printf("\n");
@@ -99,7 +109,10 @@ void inOrder(struct node* treePtr)
 
 void delete_tree(struct node** treePtr)
 {
-       free(*treePtr);
-	   delete_tree(&((*treePtr)->leftPtr));
-       delete_tree(&((*treePtr)->rightPtr));
+	if (*treePtr != NULL){
+		delete_tree(&((*treePtr)->leftPtr)); // looks left
+		delete_tree(&((*treePtr)->rightPtr)); // looks right
+		free(*treePtr); // visits the node
+		(*treePtr) = NULL; // inform the tree that node has been freed
+	}
 }
